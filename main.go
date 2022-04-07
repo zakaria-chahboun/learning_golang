@@ -383,7 +383,21 @@ func example7() {
 	 The client abort the connection after 3 secs (timeout),
 	 So the server now reveive this signal and save some resources! Cool!
 	*/
-	client2()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		// this will aborted afer 3 secs
+		client2("http://localhost:8080", time.Second*3)
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	func() {
+		// this will recieve the "Hello Go! [2]" body msg, cuz the time out is too big!
+		client2("http://localhost:8080/2", time.Second*7)
+		wg.Done()
+	}()
+	wg.Wait()
 }
 
 func client1() {
@@ -405,29 +419,30 @@ func client1() {
 	fmt.Println("Client received: ", string(bytes))
 }
 
-func client2() {
+func client2(url string, timeout time.Duration) {
 	/*
 		Like the client1() func, but this time we add a timeout to the context in the request
 		So with that, We have to separate the request and the responce funcs
 
 		Now the request context has two things:
-		1- the abort calling (by user hand) "the default req context"
-		2- + our new rule: the time out!
+		(1) the abort calling (by user hand) "the default req context"
+		(2) + our new rule: the time out!
 		Cool!, we don't mess with the server or the handlers,
 		We just did that here by the context inheritence!
 	*/
 
 	ctx := context.Background()
 	// abort the request if we passed 3 secs
-	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// create a new request with our context
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:8080", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 	// error handling
 	if err != nil {
-		log.Fatal(err.Error())
+		fmt.Println(err.Error())
+		return
 	}
 
 	// make the call of the request
@@ -435,10 +450,12 @@ func client2() {
 
 	// error handling
 	if err != nil {
-		log.Fatal(err.Error())
+		fmt.Println(err.Error())
+		return
 	}
 	if res.StatusCode != http.StatusOK {
-		log.Fatal(res.Status)
+		fmt.Println(res.Status)
+		return
 	}
 	// important
 	defer res.Body.Close()
