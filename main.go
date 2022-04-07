@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -36,7 +37,7 @@ func main() {
 	// playing with context
 	// example6()
 
-	// playing with context (advanced)
+	// playing with context (advanced) start the server fisrt (look inside it)
 	example7()
 }
 
@@ -365,20 +366,84 @@ func sleepAndTalk(ctx context.Context) {
 
 // --------------------------- //
 func example7() {
-	// start the server
-	server()
+	/*
+		- Note:
+			You have to start the server by:
+			go run server/server.go
+
+			You can use the browser or the "client1()" func!
+	*/
+
+	fmt.Println("loading ...")
+	// trying a normal http call to the server
+	//client1()
+
+	/*
+	 Calling the request with a context
+	 The client abort the connection after 3 secs (timeout),
+	 So the server now reveive this signal and save some resources! Cool!
+	*/
+	client2()
 }
 
-func server() {
-	fmt.Println("server started at: localhost:8080")
-	http.HandleFunc("/", handler)
-	http.ListenAndServe("localhost:8080", nil)
-}
-func handler(res http.ResponseWriter, req *http.Request) {
-	log.Println("---- Start the handler ----")
-	defer log.Println("---- Finish the handler ----")
+func client1() {
+	// call the server
+	res, err := http.Get("http://localhost:8080")
 
-	// a long process :)
-	time.Sleep(time.Second * 3)
-	res.Write([]byte("Hello Go!"))
+	// error handling
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	if res.StatusCode != http.StatusOK {
+		log.Fatal(res.Status)
+	}
+	// important
+	defer res.Body.Close()
+
+	// just print what the server gives us! :)
+	bytes, _ := io.ReadAll(res.Body)
+	fmt.Println("Client received: ", string(bytes))
+}
+
+func client2() {
+	/*
+		Like the client1() func, but this time we add a timeout to the context in the request
+		So with that, We have to separate the request and the responce funcs
+
+		Now the request context has two things:
+		1- the abort calling (by user hand) "the default req context"
+		2- + our new rule: the time out!
+		Cool!, we don't mess with the server or the handlers,
+		We just did that here by the context inheritence!
+	*/
+
+	ctx := context.Background()
+	// abort the request if we passed 3 secs
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	// create a new request with our context
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:8080", nil)
+
+	// error handling
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// make the call of the request
+	res, err := http.DefaultClient.Do(req)
+
+	// error handling
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	if res.StatusCode != http.StatusOK {
+		log.Fatal(res.Status)
+	}
+	// important
+	defer res.Body.Close()
+
+	// just print what the server gives us! :)
+	bytes, _ := io.ReadAll(res.Body)
+	fmt.Println("Client received: ", string(bytes))
 }
