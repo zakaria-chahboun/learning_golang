@@ -26,10 +26,13 @@ func main() {
 	// example5()
 
 	// an implementation of setTimeOut (js)
-	// example6()
+	// ---- Way 1 ----
+	// setTimeOut1()
+	// ---- Way 2 ----
+	// setTimeOut2()
 
 	// playing with context
-	example7()
+	example6()
 }
 
 // --------------------------- //
@@ -252,12 +255,11 @@ func process1(name string, out chan string) {
 }
 
 // --------------------------- //
-func example6() {
-
+func setTimeOut1() {
 	// duration
 	duration := time.Duration(time.Second * 2)
 
-	// we have just 1 timeout function (aka go routines)
+	// we have just 1 timeout function (a.k.a go routines)
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -274,9 +276,25 @@ func example6() {
 	// block go routines until finished
 	wg.Wait()
 }
+func setTimeOut2() {
+	// to let the "main" wating for us
+	done := make(chan int, 1)
+
+	// setTimeOut :) after 3 secs
+	time.AfterFunc(time.Second*3, func() {
+		fmt.Println("i'm running after 3 s")
+		done <- 0 // finish or exit
+	})
+
+	// our main code here
+	println("---- I don't wait ----")
+
+	// block or wait for our setTimeOut
+	<-done
+}
 
 // --------------------------- //
-func example7() {
+func example6() {
 
 	/*
 		You can use context as a store (like context/store in svelte)
