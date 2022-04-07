@@ -38,7 +38,7 @@ func main() {
 	// example6()
 
 	// playing with context (advanced) start the server fisrt (look inside it)
-	example7()
+	//example7()
 }
 
 // --------------------------- //
@@ -262,29 +262,31 @@ func process1(name string, out chan string) {
 
 // --------------------------- //
 func setTimeOut1() {
-	// duration
+	// set a duration
 	duration := time.Duration(time.Second * 2)
 
 	// we have just 1 timeout function (a.k.a go routines)
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// our anonymous time out func
+	// block the main until our (go routines) finished
+	defer wg.Wait()
+
+	// our anonymous setTimeOut function
 	go func() {
 		time.Sleep(duration)
 		fmt.Println("i'm runing after ", duration)
 		wg.Done()
 	}()
 
-	// our main code here
-	fmt.Println("---- i don't wait here ----")
-
-	// block go routines until finished
-	wg.Wait()
+	// ---- Our main code here ----
+	println("---- I don't wait ----")
 }
 func setTimeOut2() {
 	// to let the "main" wating for us
-	done := make(chan int, 1)
+	done := make(chan int)
+	// block or wait for our setTimeOut
+	defer func() { <-done }()
 
 	// setTimeOut :) after 3 secs
 	time.AfterFunc(time.Second*3, func() {
@@ -292,11 +294,8 @@ func setTimeOut2() {
 		done <- 0 // finish or exit
 	})
 
-	// our main code here
+	// ---- Our main code here ----
 	println("---- I don't wait ----")
-
-	// block or wait for our setTimeOut
-	<-done
 }
 
 // --------------------------- //
@@ -387,7 +386,7 @@ func example7() {
 	wg.Add(1)
 	go func() {
 		// this will aborted afer 3 secs
-		client2("http://localhost:8080", time.Second*3)
+		client2("http://localhost:8080", time.Second*2)
 		wg.Done()
 	}()
 
