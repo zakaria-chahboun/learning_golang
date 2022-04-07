@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
 	"sync"
 	"time"
 
@@ -32,7 +34,10 @@ func main() {
 	// setTimeOut2()
 
 	// playing with context
-	example6()
+	// example6()
+
+	// playing with context (advanced)
+	example7()
 }
 
 // --------------------------- //
@@ -297,22 +302,39 @@ func setTimeOut2() {
 func example6() {
 
 	/*
-		You can use context as a store (like context/store in svelte)
+		We can use context as a store (like context in svelte)
 		The context store the data in a "map", so yu can use what ever type of data!
 	*/
 	myStore := context.Background() // scoped context: means my parent is "this" func: example7()
-
-	myStore = addValue(myStore) // return a new store (immutable)
+	myStore = storeValue(myStore)   // return a new store (immutable)
 	readValue(myStore)
 
-	addValue2(&myStore) // mutable store
+	storeValue2(&myStore) // mutable store
 	readValue(myStore)
 
-	//timeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	/*
+		we can also make a deadline or timeout to our functions that subscibe to the context
+		by calling "cancel()" manually or by a duration
+	*/
+	parent := context.Background()                            // like "this" in other langs
+	ctx, cancel := context.WithTimeout(parent, time.Second*3) // rule: after 3 secs, cancel the job
+	defer cancel()                                            // don't forget this, cuz the timer is eating some resources if the main is done before the time is done
 
+	// our func is subscribed to the context, so
+	// the context terminate in a 3 secs, the job is cancelled!
+	sleepAndTalk(ctx)
+
+	/*
+		- Why we need the context? we can do that by just a normal timer!
+		the answer is, Nope!
+
+		- The power of the context is, if any reason the "root or parent" context gets cancelled
+		that cancellation will propagate to all the children contexts
+		and all of those operations will stop!
+	*/
 }
 
-func addValue(ctx context.Context) context.Context {
+func storeValue(ctx context.Context) context.Context {
 	// context, key, value!
 	newContext := context.WithValue(ctx, "name", "zaki")
 	return newContext
@@ -320,7 +342,7 @@ func addValue(ctx context.Context) context.Context {
 		store the "key,value" in the "context"
 	*/
 }
-func addValue2(ctx *context.Context) {
+func storeValue2(ctx *context.Context) {
 	// edit the current context! pointer
 	*ctx = context.WithValue(*ctx, "name", "karim")
 }
@@ -328,4 +350,35 @@ func readValue(ctx context.Context) {
 	// retrieve the key "name"
 	val := ctx.Value("name")
 	fmt.Println(val)
+}
+func sleepAndTalk(ctx context.Context) {
+	// sleep a 5 sec then talk, but if the context is canceled, then print an error
+	// it's a deadline bro!
+
+	select {
+	case <-time.After(time.Second * 5):
+		fmt.Println("i'm talking after 5 secs")
+	case <-ctx.Done():
+		println(ctx.Err().Error())
+	}
+}
+
+// --------------------------- //
+func example7() {
+	// start the server
+	server()
+}
+
+func server() {
+	fmt.Println("server started at: localhost:8080")
+	http.HandleFunc("/", handler)
+	http.ListenAndServe("localhost:8080", nil)
+}
+func handler(res http.ResponseWriter, req *http.Request) {
+	log.Println("---- Start the handler ----")
+	defer log.Println("---- Finish the handler ----")
+
+	// a long process :)
+	time.Sleep(time.Second * 3)
+	res.Write([]byte("Hello Go!"))
 }
