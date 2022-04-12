@@ -35,7 +35,7 @@ func main() {
 	// setTimeout2()
 
 	// Go Tickers: implementation of setInterval (js):
-	example6()
+	// example6()
 
 	// playing with context
 	// example7()
@@ -43,8 +43,8 @@ func main() {
 	// playing with context (advanced) start the server fisrt (look inside it)
 	//example8()
 
-	// laying with the singleton pattern
-	//example9()
+	// playing with the singleton pattern
+	example9()
 }
 
 // --------------------------- //
@@ -275,18 +275,18 @@ func setTimeout1() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// block the main until our (go routines) finished
-	defer wg.Wait()
-
 	// our anonymous setTimeout function
 	go func() {
+		defer wg.Done() // will work in any case, even if the func broken
 		time.Sleep(duration)
 		fmt.Println("i'm runing after ", duration)
-		wg.Done()
 	}()
 
 	// ---- Our main code here ----
 	println("---- I don't wait ----")
+
+	// block the main until our (go routines) finished
+	wg.Wait()
 }
 func setTimeout2() {
 	// to let the "main" wating for us
