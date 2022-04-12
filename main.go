@@ -39,6 +39,9 @@ func main() {
 
 	// playing with context (advanced) start the server fisrt (look inside it)
 	//example7()
+
+	// laying with the singleton pattern
+	example8()
 }
 
 // --------------------------- //
@@ -462,4 +465,29 @@ func client2(url string, timeout time.Duration) {
 	// just print what the server gives us! :)
 	bytes, _ := io.ReadAll(res.Body)
 	fmt.Println("Client received: ", string(bytes))
+}
+
+// --------------------------- //
+func example8() {
+	/*
+		The singleton pattern:
+		Sometimes we need our code to be executed only once in the entire lifetime!
+		So we can do this with mutext.lock/unlock, but to be more crleary and 100% safe
+		We use the "Sync" package with the "..Do()" funtion!
+	*/
+
+	var Once sync.Once
+
+	// Here is a sample program that shows how even if you call it multiple times, it gets executed only once.
+	for range []int{1, 2, 3} {
+		Once.Do(func() {
+			fmt.Println("I executed jut once!")
+		})
+	}
+
+	/*
+		The "singleton pattern" is useful when
+			we one to instantiate a database connection one time
+			even if our app is calling the constractor function many times!
+	*/
 }
