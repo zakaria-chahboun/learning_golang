@@ -28,20 +28,23 @@ func main() {
 	// playing with concurency
 	// example5()
 
-	// an implementation of setTimeOut (js)
+	// implementation of setTimeout (js)
 	// ---- Way 1 ----
-	// setTimeOut1()
+	// setTimeout1()
 	// ---- Way 2 ----
-	// setTimeOut2()
+	// setTimeout2()
+
+	// Go Tickers: implementation of setInterval (js):
+	example6()
 
 	// playing with context
-	// example6()
+	// example7()
 
 	// playing with context (advanced) start the server fisrt (look inside it)
-	//example7()
+	//example8()
 
 	// laying with the singleton pattern
-	example8()
+	//example9()
 }
 
 // --------------------------- //
@@ -264,7 +267,7 @@ func process1(name string, out chan string) {
 }
 
 // --------------------------- //
-func setTimeOut1() {
+func setTimeout1() {
 	// set a duration
 	duration := time.Duration(time.Second * 2)
 
@@ -275,7 +278,7 @@ func setTimeOut1() {
 	// block the main until our (go routines) finished
 	defer wg.Wait()
 
-	// our anonymous setTimeOut function
+	// our anonymous setTimeout function
 	go func() {
 		time.Sleep(duration)
 		fmt.Println("i'm runing after ", duration)
@@ -285,13 +288,13 @@ func setTimeOut1() {
 	// ---- Our main code here ----
 	println("---- I don't wait ----")
 }
-func setTimeOut2() {
+func setTimeout2() {
 	// to let the "main" wating for us
 	done := make(chan int)
-	// block or wait for our setTimeOut
+	// block or wait for our setTimeout
 	defer func() { <-done }()
 
-	// setTimeOut :) after 3 secs
+	// setTimeout :) after 3 secs
 	time.AfterFunc(time.Second*3, func() {
 		fmt.Println("i'm running after 3 s")
 		done <- 0 // finish or exit
@@ -303,6 +306,32 @@ func setTimeOut2() {
 
 // --------------------------- //
 func example6() {
+	// Tickers, is a function called in every duration in interval
+	tk := time.NewTicker(time.Second)
+
+	fmt.Println("Start..")
+
+	// loop forever "tk.C" until "tk.Stop()"
+	counter := 1
+	for range tk.C {
+		fmt.Println("Calling", counter)
+
+		// stop after 4 iteration
+		if counter == 4 {
+			tk.Stop()
+			break
+		}
+		counter++
+	}
+
+	/*
+		of course if you want an alternative to setInterval of js
+		you have to work with tickers + go rourines
+	*/
+}
+
+// --------------------------- //
+func example7() {
 
 	/*
 		We can use context as a store (like context in svelte)
@@ -367,7 +396,7 @@ func sleepAndTalk(ctx context.Context) {
 }
 
 // --------------------------- //
-func example7() {
+func example8() {
 	/*
 		- Note:
 			You have to start the server by:
@@ -468,7 +497,7 @@ func client2(url string, timeout time.Duration) {
 }
 
 // --------------------------- //
-func example8() {
+func example9() {
 	/*
 		The singleton pattern:
 		Sometimes we need our code to be executed only once in the entire lifetime!
