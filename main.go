@@ -48,7 +48,10 @@ func main() {
 	// example9()
 
 	// playing with Atomic Counters
-	example10()
+	// example10()
+
+	// playing with mutex
+	example11()
 }
 
 // --------------------------- //
@@ -584,5 +587,54 @@ func example10() {
 		 we’d likely get a different number, changing between runs,
 		 because the goroutines would interfere with each other.
 		 Moreover, we’d get data race failures when running with the -race flag.
+	*/
+}
+
+// --------------------------- //
+func example11() {
+	// alibaba is our container :p
+	// we don't need to fill the 'mu' mutex here
+	alibaba := container{
+		counters: map[string]int{"a": 0, "b": 0},
+	}
+	var wg sync.WaitGroup
+
+	// This function increments a named counter in a loop.
+	counting := func(name string, max int) {
+		defer wg.Done()
+		for i := 0; i < max; i++ {
+			alibaba.increment(name)
+		}
+	}
+
+	/*
+		Run several goroutines concurrently;
+		note that they all access the same 'container',
+		and two of them access the same 'counter'.
+	*/
+	wg.Add(3)
+	go counting("a", 1000)
+	go counting("b", 1000)
+	go counting("a", 1000)
+	wg.Wait()
+
+	// map[a:2000 b:1000]
+	fmt.Println("Alibaba counters:", alibaba.counters)
+}
+
+type container struct {
+	counters map[string]int // map, every name has a counter
+	mu       sync.Mutex     // mutex to organize the go routines access
+}
+
+func (this *container) increment(name string) {
+	// lock the go routines, just 1 at time
+	this.mu.Lock()
+	this.counters[name]++  // now we have like the atomic counter, thanks to mutex!
+	defer this.mu.Unlock() // finally, it's the others go routines turn :p
+
+	/*
+		if we don't use mutex we get:
+		"fatal error: concurrent map writes"
 	*/
 }
