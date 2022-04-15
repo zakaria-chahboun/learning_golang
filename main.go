@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"example.com/bill"
@@ -34,8 +35,8 @@ func main() {
 	// ---- Way 2 ----
 	// setTimeout2()
 
-	// Go Tickers: implementation of setInterval (js):
-	// example6()
+	// Go Tickers: implementation of setInterval (js) + (Sleep Vs Ticker)
+	//example6()
 
 	// playing with context
 	// example7()
@@ -44,7 +45,10 @@ func main() {
 	//example8()
 
 	// playing with the singleton pattern
-	example9()
+	// example9()
+
+	// playing with Atomic Counters
+	example10()
 }
 
 // --------------------------- //
@@ -306,15 +310,19 @@ func setTimeout2() {
 
 // --------------------------- //
 func example6() {
-	// Tickers, is a function called in every duration in interval
+	/*
+		Tickers are for when you want to do something repeatedly at regular intervals
+	*/
+
+	// ticker with Every 1 secs
 	tk := time.NewTicker(time.Second)
 
 	fmt.Println("Start..")
 
-	// loop forever "tk.C" until "tk.Stop()"
+	// loop over "tk.C" channel, until "tk.Stop()"
 	counter := 1
 	for range tk.C {
-		fmt.Println("Calling", counter)
+		log.Println("Calling", counter)
 
 		// stop after 4 iteration
 		if counter == 4 {
@@ -325,8 +333,20 @@ func example6() {
 	}
 
 	/*
-		of course if you want an alternative to setInterval of js
-		you have to work with tickers + go rourines
+		of course if you want a non-blocking alternative to setInterval of js
+		you have to work with tickers + go routines
+		----------------
+		Sleep Vs Ticker
+		----------------
+		- time.Sleep just waits for the provided time and continues with the program. There is no adjustment if the rest of the code takes longer.
+
+		- The ticker takes the execution time of the provided block into account and skips an interval, if necessary.
+
+		Imagine this scenario: You provide an interval of one minute and your code takes 10 seconds to execute.
+
+		- In your first version your program executes your code for ten seconds and then sleeps for 60 seconds. Practically it gets called every 70 seconds.
+
+		- In your second version your code gets executed for 10 seconds, then the ticker adjusts the wait time to 50 seconds. Your code gets executed exactly each minute.
 	*/
 }
 
@@ -518,5 +538,51 @@ func example9() {
 		The "singleton pattern" is useful when
 			we one to instantiate a database connection one time
 			even if our app is calling the constractor function many times!
+	*/
+}
+
+// --------------------------- //
+func example10() {
+
+	/*
+		Here we’ll look at using the sync/atomic package for atomic counters
+		accessed by multiple goroutines.
+	*/
+
+	var counter uint64 //  always-positive
+	var wg sync.WaitGroup
+
+	// We’ll start 50 goroutines that each increment the counter exactly 1000 times.
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			/*
+				To atomically increment the counter we use AddUint64,
+				giving it the memory address of our 'counter' with the '&' syntax.
+			*/
+			for j := 0; j < 1000; j++ {
+				// add +1 to the counter atomically
+				atomic.AddUint64(&counter, 1)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	// we expected counter=50,000
+	fmt.Println("We have now", counter, "operations")
+
+	/*
+		It’s safe to access 'counter' now because we know no other goroutine is writing to it.
+		 Reading atomics safely while they are being updated is also possible
+		 using functions like 'atomic.LoadUint64'.
+
+		 NOTE:
+		 We expect to get exactly 50,000 operations.
+		 Had we used the non-atomic ops++ to increment the counter,
+		 we’d likely get a different number, changing between runs,
+		 because the goroutines would interfere with each other.
+		 Moreover, we’d get data race failures when running with the -race flag.
 	*/
 }
