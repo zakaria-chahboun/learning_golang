@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -51,7 +52,10 @@ func main() {
 	// example10()
 
 	// playing with mutex
-	example11()
+	// example11()
+
+	// playing with sort package
+	example12()
 }
 
 // --------------------------- //
@@ -96,6 +100,8 @@ func example2() {
 }
 
 func readSlice(s []int) {
+	// visit the example12()
+
 	fmt.Println("readSlice:")
 	for _, v := range s {
 		fmt.Println(v)
@@ -637,4 +643,29 @@ func (this *container) increment(name string) {
 		if we don't use mutex we get:
 		"fatal error: concurrent map writes"
 	*/
+}
+
+// --------------------------- //
+func example12() {
+	names := []string{"zakaria", "mona", "ilyas", "ayoub"}
+	numbers := []int{8, 5, 2, 6, 3, 7, 1}
+
+	/*
+		everythings in Go are bassed by value by default
+		the slices also passed by value, BUT it points to the original array
+		so, yes it create a copy but it refers to the same array!
+
+		A slice is a descriptor of an array segment:
+		[ptr *array, len int, cap int]
+	*/
+	sort.Strings(names) // attention!
+	sort.Ints(numbers)  // attention!
+
+	fmt.Println("my names are sorted now:", names)
+	fmt.Println("my numbers are sorted now:", numbers)
+
+	isSorted := sort.StringsAreSorted(names) // check if our 'names' are sorted
+
+	fmt.Println("is our names sorted?", isSorted)
+
 }
