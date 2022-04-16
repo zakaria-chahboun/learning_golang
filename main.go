@@ -55,7 +55,10 @@ func main() {
 	// example11()
 
 	// playing with sorting
-	example12()
+	// example12()
+
+	// playing with panic() & recover(): a.k.a try catch
+	example13()
 }
 
 // --------------------------- //
@@ -692,4 +695,35 @@ func (a sortByLenght) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a sortByLenght) Less(i, j int) bool {
 	// here is out implementation
 	return len(a[i]) < len(a[j])
+}
+
+// --------------------------- //
+func example13() {
+	/*
+	   A panic typically means something went unexpectedly wrong.
+	   Mostly we use it to fail fast on errors that shouldn’t occur during normal operation,
+	   or that we aren’t prepared to handle gracefully
+	*/
+
+	fmt.Println("---- Doing something .. ----")
+
+	/*
+		Like catch
+		recover must be called inside a deferred function
+	*/
+	defer func() {
+		if catch := recover(); catch != nil {
+			fmt.Println("Recovered - The panic error is:", catch)
+		}
+	}()
+
+	// it's panic! like throw
+	doingSomthing()
+
+	fmt.Println("---- I can't show up! Cuz of the panic ----")
+
+}
+
+func doingSomthing() {
+	panic(`"we can't continue baby!"`) // abort the app
 }
