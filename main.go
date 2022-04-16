@@ -54,7 +54,7 @@ func main() {
 	// playing with mutex
 	// example11()
 
-	// playing with sort package
+	// playing with sorting
 	example12()
 }
 
@@ -657,15 +657,39 @@ func example12() {
 
 		A slice is a descriptor of an array segment:
 		[ptr *array, len int, cap int]
+
+		Sort is ascending order by default
 	*/
-	sort.Strings(names) // attention!
-	sort.Ints(numbers)  // attention!
+	//sort.Strings(names) // attention!
+	sort.Ints(numbers) // attention!
 
 	fmt.Println("my names are sorted now:", names)
 	fmt.Println("my numbers are sorted now:", numbers)
 
 	isSorted := sort.StringsAreSorted(names) // check if our 'names' are sorted
-
 	fmt.Println("is our names sorted?", isSorted)
 
+	// sort in decreasing order
+	sort.Sort(sort.Reverse(sort.StringSlice(names))) // see bellow to understand
+	fmt.Println("names in decreasing order:", names)
+
+	/*
+		Custom Sorting!
+		we can implement out custom sort algoritm to sort for example by "lenght"
+		instead of alphabetically sorting
+
+		use vscode go plugin to create sort functions for you :p
+	*/
+
+	sort.Sort(sortByLenght(names)) // sort names by lenght
+	fmt.Println("names sorted by lenght", names)
+}
+
+type sortByLenght []string
+
+func (a sortByLenght) Len() int      { return len(a) }
+func (a sortByLenght) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a sortByLenght) Less(i, j int) bool {
+	// here is out implementation
+	return len(a[i]) < len(a[j])
 }
