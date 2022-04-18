@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -58,7 +59,10 @@ func main() {
 	// example12()
 
 	// playing with panic() & recover(): a.k.a try catch
-	example13()
+	// example13()
+
+	// playing with Strings
+	// example14()
 }
 
 // --------------------------- //
@@ -650,7 +654,7 @@ func (this *container) increment(name string) {
 
 // --------------------------- //
 func example12() {
-	names := []string{"zakaria", "mona", "ilyas", "ayoub"}
+	names := []string{"zakaria", "mona", "ayoub", "ilyas"}
 	numbers := []int{8, 5, 2, 6, 3, 7, 1}
 
 	/*
@@ -663,8 +667,8 @@ func example12() {
 
 		Sort is ascending order by default
 	*/
-	//sort.Strings(names) // attention!
-	sort.Ints(numbers) // attention!
+	sort.Strings(names) // attention!
+	sort.Ints(numbers)  // attention!
 
 	fmt.Println("my names are sorted now:", names)
 	fmt.Println("my numbers are sorted now:", numbers)
@@ -672,9 +676,15 @@ func example12() {
 	isSorted := sort.StringsAreSorted(names) // check if our 'names' are sorted
 	fmt.Println("is our names sorted?", isSorted)
 
-	// sort in decreasing order
-	sort.Sort(sort.Reverse(sort.StringSlice(names))) // see bellow to understand
-	fmt.Println("names in decreasing order:", names)
+	// sort in decreasing order ---- way 1 ----
+	sort.Sort(sort.Reverse(sort.StringSlice(names))) // see "custom sorting" bellow to understand
+	fmt.Println("names in decreasing order(1):", names)
+
+	// sort in decreasing order ---- way 2 ----
+	sort.Slice(names, func(i, j int) bool {
+		return names[i] < names[i]
+	})
+	fmt.Println("names in decreasing order(2):", names)
 
 	/*
 		Custom Sorting!
@@ -718,12 +728,33 @@ func example13() {
 	}()
 
 	// it's panic! like throw
-	doingSomthing()
+	justPanic()
 
 	fmt.Println("---- I can't show up! Cuz of the panic ----")
-
 }
 
-func doingSomthing() {
-	panic(`"we can't continue baby!"`) // abort the app
+func justPanic() {
+	panic(`"we can't continue baby!"`) // abort the whole app!
+}
+
+// --------------------------- //
+func example14() {
+	var p = fmt.Println
+
+	/*
+		The standard library’s strings package provides many useful string-related functions.
+	*/
+
+	p("Contains:  ", strings.Contains("test", "es"))
+	p("Count:     ", strings.Count("test", "t"))
+	p("HasPrefix: ", strings.HasPrefix("test", "te"))
+	p("HasSuffix: ", strings.HasSuffix("test", "st"))
+	p("Index:     ", strings.Index("test", "e"))
+	p("Join:      ", strings.Join([]string{"a", "b"}, "-"))
+	p("Repeat:    ", strings.Repeat("a", 5))
+	p("Replace:   ", strings.Replace("foo", "o", "0", -1))
+	p("Replace:   ", strings.Replace("foo", "o", "0", 1))
+	p("Split:     ", strings.Split("a-b-c-d-e", "-"))
+	p("ToLower:   ", strings.ToLower("TEST"))
+	p("ToUpper:   ", strings.ToUpper("test"))
 }
