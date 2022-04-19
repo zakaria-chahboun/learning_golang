@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
+	"text/template"
 	"time"
 
 	"example.com/bill"
@@ -63,6 +66,9 @@ func main() {
 
 	// playing with Strings
 	// example14()
+
+	// playing with templates
+	example15()
 }
 
 // --------------------------- //
@@ -757,4 +763,102 @@ func example14() {
 	p("Split:     ", strings.Split("a-b-c-d-e", "-"))
 	p("ToLower:   ", strings.ToLower("TEST"))
 	p("ToUpper:   ", strings.ToUpper("test"))
+}
+
+// --------------------------- //
+func example15() {
+	t := template.New("template1")
+
+	// ---- parse from string ----
+	t, err := t.Parse("Hi, i'm {{.}}\n")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	// fill the template
+	fmt.Println("---- t ----")
+	err = t.Execute(os.Stdout, "zaki") // Hi, i'm zaki
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// ---- parse from file ----
+	path := "templates/t1.txt"
+	t1 := template.Must(template.ParseFiles(path)) // 'Must' instead of cheking 'err' manually: it's panic()
+	fmt.Println("---- t1 ----")
+	t1.Execute(os.Stderr, "zaki")
+
+	// ---- named filled data ----
+	path = "templates/t2.txt"
+	t2 := template.Must(template.ParseFiles(path))
+	// you can use structs
+	fmt.Println("---- t2 ----")
+	t2.Execute(os.Stderr, struct {
+		Name    string
+		Age     int
+		Hobbies []string
+	}{
+		Name:    "zaki",
+		Age:     26,
+		Hobbies: []string{"voice over", "singing", "trip", "cooking"},
+	})
+
+	/*
+		Note:
+		- instead of calling `ParseFiles(..)` each time
+		you can use `ParseGlob("templates/*")` one time,
+		- then you can excute each file like that:
+		.ExecuteTemplate(os.Stdout, "t1.txt", ..)
+		.ExecuteTemplate(os.Stdout, "t2.txt", ..)
+	*/
+
+	// ---- Declaring variables inside templates ----
+	path = "templates/t3.txt"
+	t3 := template.Must(template.ParseFiles(path))
+	fmt.Println("---- t3 ----")
+	// Note: '-' is for trim whitespaces
+	t3.Execute(os.Stderr, nil)
+
+	// ---- Conditional Statements ----
+	path = "templates/t4.txt"
+	t4 := template.Must(template.ParseFiles(path))
+	fmt.Println("---- t4 ----")
+	// Generate random number between 100 and 300
+	rand.Seed(time.Now().UnixNano())
+	min := 100
+	max := 300
+	num := rand.Intn((max-min)+1) + min
+	t4.Execute(os.Stderr, num)
+
+	// ---- Using functions in templates ----
+	/*
+		Note:
+		- functions must have only 1 return value, or 1 return value and an error
+		- bind it before the parsing
+	*/
+	// define our func
+	decorator := func(text string) string {
+		return "**" + text + "**"
+	}
+	// put it into func map
+	myFunctions := template.FuncMap{
+		"toUpper":   strings.ToUpper,
+		"decorator": decorator,
+	}
+	path = "templates/t5.txt"
+	/*
+		Since the templates created by ParseFiles
+		are named by the base name of the argument files,
+		the base name here is "t5.txt"
+	*/
+	t5 := template.Must(template.New("t5.txt").Funcs(myFunctions).ParseFiles(path))
+	// just call it inside the template as a pipeline "|" or argument
+	fmt.Println("---- t5 ----")
+	err = t5.Execute(os.Stderr, "i'm a beautiful text")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	/*
+		You can do the same in HTML by "html/template" :)
+	*/
 }
