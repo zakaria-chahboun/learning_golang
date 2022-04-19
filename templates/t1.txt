@@ -1,0 +1,2 @@
+Hi i'm {{.}}
+Yes! {{.}} is my name.

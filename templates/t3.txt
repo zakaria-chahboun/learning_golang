@@ -1,0 +1,11 @@
+{{/* you can add '-' in before or after the declaration to trim the whaitespaces */ -}}
+{{$product := "milky" -}}
+{{$price := 52.5 -}}
+{{$quantity := 2 -}}
+{{$total := 105 -}}
+Your bill is:
+-------------------------------
+ product | price | Q. | total |
+-------------------------------
+ {{$product}} | {{$price}} DH | {{$quantity}} | {{$total}} DH |
+-------------------------------

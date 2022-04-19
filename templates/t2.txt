@@ -1,0 +1,5 @@
+My name is {{.Name}}, I have {{.Age}} years old.
+These are my hobbies:
+{{range $key, $val := .Hobbies}}
+{{$key}}: {{$val}}
+{{end}}

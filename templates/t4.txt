@@ -1,0 +1,7 @@
+{{if (lt . 200)}}
+Number {{.}} < 200
+{{else if (eq . 200)}}
+Number {{.}} = 200
+{{else}}
+Number {{.}} > 200
+{{end}}
