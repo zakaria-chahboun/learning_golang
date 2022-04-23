@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -72,7 +73,10 @@ func main() {
 	// example15()
 
 	// playing with regular expressions
-	example16()
+	// example16()
+
+	// playing with json
+	example17()
 }
 
 // --------------------------- //
@@ -920,4 +924,59 @@ func example16() {
 	re = regexp.MustCompile(`\[\d\]`)
 	splited := re.Split(text, -1)
 	fmt.Println(splited) // [akram asaad mona zakaria ]
+}
+
+// --------------------------- //
+func example17() {
+
+	// ---- JSON types ----
+	// convert basic data types to JSON types
+	jsonBool, _ := json.Marshal(true)
+	jsonInt, _ := json.Marshal(3)
+	jsonString, _ := json.Marshal("hello")
+
+	fmt.Println(true, "to", string(jsonBool))
+	fmt.Println(3, "to", string(jsonInt))
+	fmt.Println("hello", "to", string(jsonString))
+	fmt.Println("-------------------")
+
+	// convert slices and maps, which encode to JSON arrays and objects as you’d expect :)
+	goSlice := []string{"zakaria", "mona"}
+	goMap := map[string]int{"code": 35, "label": 12}
+	jsonArray, _ := json.Marshal(goSlice)
+	jonObject, _ := json.Marshal(goMap)
+
+	fmt.Println(goSlice, "to", string(jsonArray))
+	fmt.Println(goMap, "to", string(jonObject))
+	fmt.Println("-------------------")
+
+	// ---- Custom data type ----
+	res1 := &responce_1{
+		ID:   104,
+		Data: []int{10, 20, 30, 40, 50, 60},
+	}
+	jsonRes1, _ := json.Marshal(res1)
+	fmt.Println(res1, "to", string(jsonRes1))
+	fmt.Println("-------------------")
+
+	// custom json keys
+	res2 := &responce_2{
+		ID:   104,
+		Data: goSlice,
+	}
+	jsonRes2, _ := json.Marshal(res2)
+	fmt.Println(res1, "to", string(jsonRes2))
+	fmt.Println("-------------------")
+
+}
+
+type responce_1 struct {
+	// Note: JSON will only include exported fields
+	ID   int
+	Data []int
+}
+type responce_2 struct {
+	// Note: JSON will only include exported fields
+	ID   int      `json:"id"`    // tag: to custom JSON key names
+	Data []string `json:"names"` // tag
 }
