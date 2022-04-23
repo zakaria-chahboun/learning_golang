@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -52,7 +53,7 @@ func main() {
 	// playing with the singleton pattern
 	// example9()
 
-	// playing with Atomic Counters
+	// playing with atomic counters
 	// example10()
 
 	// playing with mutex
@@ -64,11 +65,14 @@ func main() {
 	// playing with panic() & recover(): a.k.a try catch
 	// example13()
 
-	// playing with Strings
+	// playing with strings
 	// example14()
 
 	// playing with templates
-	example15()
+	// example15()
+
+	// playing with regular expressions
+	example16()
 }
 
 // --------------------------- //
@@ -861,4 +865,59 @@ func example15() {
 	/*
 		You can do the same in HTML by "html/template" :)
 	*/
+}
+
+// --------------------------- //
+func example16() {
+	re, err := regexp.Compile("^z.*a$")
+	if err != nil {
+		panic(err)
+		// or regexp.MustCompile()
+	}
+
+	// check if strings mutch the regular expression
+	ok := re.Match([]byte("zakaria"))
+	fmt.Println(ok) // true
+	ok = re.MatchString("zakia")
+	fmt.Println(ok) // true
+
+	// ----  Find ----
+	re = regexp.MustCompile(`z[a-z]+a`)
+	text := "my name is zakaria, my wife is zakia"
+
+	// get the 1st match string
+	match := re.FindString(text)
+	fmt.Println(match) // 'zakaria'
+
+	// get the 1st match index
+	location := re.FindStringIndex(text)
+	fmt.Println(location) // slice of 2: [start, end not included]: [11, 18]
+
+	// get all matches strings
+	matches := re.FindAllString(text, -1) // -1 to match all strings, or you can set a max number
+	fmt.Println(matches)                  // ['zakaria', 'zakia']
+
+	// get all matches indexs
+	locations := re.FindAllStringIndex(text, -1)
+	fmt.Println(locations) // slice or slices: [[11 18] [31 36]]
+
+	// ---- Replace ----
+	replaced := re.ReplaceAllString(text, "anonymous") // "my name is anonymous, my wife is anonymous"
+	fmt.Println(replaced)
+
+	// ---- Replace function ----
+	out := re.ReplaceAllStringFunc(text, strings.ToUpper) // "my name is ZAKARIA, my wife is ZAKIA"
+	fmt.Println(out)
+
+	decorator := func(match string) string {
+		return "**" + match + "**"
+	}
+	out = re.ReplaceAllStringFunc(text, decorator) // "my name is **zakaria**, my wife is **zakia**"
+	fmt.Println(out)
+
+	// ---- Split ----
+	text = "akram[1]asaad[2]mona[3]zakaria[4]"
+	re = regexp.MustCompile(`\[\d\]`)
+	splited := re.Split(text, -1)
+	fmt.Println(splited) // [akram asaad mona zakaria ]
 }
