@@ -929,8 +929,12 @@ func example16() {
 // --------------------------- //
 func example17() {
 
-	// ---- JSON types ----
-	// convert basic data types to JSON types
+	/*
+		Form Go data types to Json data types
+		a.k.a "JSON.stringify"
+	*/
+
+	// basic types
 	jsonBool, _ := json.Marshal(true)
 	jsonInt, _ := json.Marshal(3)
 	jsonString, _ := json.Marshal("hello")
@@ -940,7 +944,7 @@ func example17() {
 	fmt.Println("hello", "to", string(jsonString))
 	fmt.Println("-------------------")
 
-	// convert slices and maps, which encode to JSON arrays and objects as you’d expect :)
+	// convert slices and maps to JSON arrays and objects
 	goSlice := []string{"zakaria", "mona"}
 	goMap := map[string]int{"code": 35, "label": 12}
 	jsonArray, _ := json.Marshal(goSlice)
@@ -950,7 +954,7 @@ func example17() {
 	fmt.Println(goMap, "to", string(jonObject))
 	fmt.Println("-------------------")
 
-	// ---- Custom data type ----
+	// ---- Custom data types ----
 	res1 := &responce_1{
 		ID:   104,
 		Data: []int{10, 20, 30, 40, 50, 60},
@@ -959,7 +963,7 @@ func example17() {
 	fmt.Println(res1, "to", string(jsonRes1))
 	fmt.Println("-------------------")
 
-	// custom json keys
+	// with custom json keys
 	res2 := &responce_2{
 		ID:   104,
 		Data: goSlice,
@@ -967,6 +971,18 @@ func example17() {
 	jsonRes2, _ := json.Marshal(res2)
 	fmt.Println(res1, "to", string(jsonRes2))
 	fmt.Println("-------------------")
+
+	/*
+		Form Json data types to Go data types
+		a.k.a "JSON.parse"
+	*/
+	json_string := `{"id": 99, "names": ["zaki", "mohammed", "imane"]}`
+	var obj responce_2
+	err := json.Unmarshal([]byte(json_string), &obj)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(obj.Data)
 
 }
 
