@@ -7,7 +7,9 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -76,7 +78,10 @@ func main() {
 	// example16()
 
 	// playing with json
-	example17()
+	// example17()
+
+	// playing with url parsing
+	example18()
 }
 
 // --------------------------- //
@@ -995,4 +1000,53 @@ type responce_2 struct {
 	// Note: JSON will only include exported fields
 	ID   int      `json:"id"`    // tag: to custom JSON key names
 	Data []string `json:"names"` // tag
+}
+
+// --------------------------- //
+func example18() {
+	stringUrl := "postgres://zaki:123456@host.com:5432/api?version=1.0#f"
+	res, err := url.Parse(stringUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	// Scheme --> postgres
+	fmt.Println(res.Scheme)
+
+	// Username --> zaki
+	fmt.Println(res.User.Username())
+
+	// Password --> 123456, true
+	fmt.Println(res.User.Password())
+
+	// Host --> host.com:5432
+	fmt.Println(res.Host)
+
+	// Hostname --> host.com
+	fmt.Println(res.Hostname())
+
+	// Port --> 5432
+	fmt.Println(res.Port())
+
+	// ----- or ------
+
+	host, port, _ := net.SplitHostPort(res.Host)
+	// Host, Port --> host.com, 5432
+	fmt.Println(host, port)
+
+	// Path --> /api
+	fmt.Println(res.Path)
+
+	// Fragment --> f
+	fmt.Println(res.Fragment)
+
+	// Query string --> version=1.0
+	fmt.Println(res.RawQuery)
+
+	// Query map --> map[version:[1.0]]
+	fmt.Println(res.Query())
+	// Get query --> 1.0
+	fmt.Println(res.Query().Get("version"))
+	// Check query --> true
+	fmt.Println(res.Query().Has("version"))
 }
