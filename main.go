@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/md5"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -81,7 +83,10 @@ func main() {
 	// example17()
 
 	// playing with url parsing
-	example18()
+	// example18()
+
+	// playing with encryption
+	example19()
 }
 
 // --------------------------- //
@@ -1049,4 +1054,34 @@ func example18() {
 	fmt.Println(res.Query().Get("version"))
 	// Check query --> true
 	fmt.Println(res.Query().Has("version"))
+}
+
+// ------------------------------ //
+func example19() {
+	// text to encrypt
+	text := "my text"
+
+	// encryption type: sha256
+	hash := sha256.New()
+
+	// encrypt text to sha256 in a byte stream
+	hash.Write([]byte(text))
+	bStream := hash.Sum(nil)
+
+	// convert []byte to string
+	hash_text := fmt.Sprintf("%x", bStream)
+
+	// output: 7330d2b39ca35eaf4cb95fc846c21ee6a39af698154a83a586ee270a0d372104
+	fmt.Println(hash_text)
+
+	// --------------------------------------- //
+
+	// enctyption type: md5
+	hash = md5.New()
+	hash.Write([]byte(text))
+	bStream = hash.Sum(nil)
+	hash_text = fmt.Sprintf("%x", bStream)
+
+	// output: d3b96ce8c9fb4e9bd0198d03ba6852c7
+	fmt.Println(hash_text)
 }
