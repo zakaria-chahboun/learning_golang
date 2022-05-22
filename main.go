@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -86,7 +87,10 @@ func main() {
 	// example18()
 
 	// playing with encryption
-	example19()
+	// example19()
+
+	// playing with base64 encroding
+	example20()
 }
 
 // --------------------------- //
@@ -1056,7 +1060,7 @@ func example18() {
 	fmt.Println(res.Query().Has("version"))
 }
 
-// ------------------------------ //
+// --------------------------- //
 func example19() {
 	// text to encrypt
 	text := "my text"
@@ -1084,4 +1088,41 @@ func example19() {
 
 	// output: d3b96ce8c9fb4e9bd0198d03ba6852c7
 	fmt.Println(hash_text)
+}
+
+// ------------------------------ //
+func example20() {
+	/*
+		Go supports both standard and URL-compatible base64.
+	*/
+
+	// my data to encode, can be binary too
+	data := "Hi! i have 26 years old!"
+
+	// ---- Standard encoding: like btoa() in js ----
+	encodedData := base64.StdEncoding.EncodeToString([]byte(data))
+	// SGkhIGkgaGF2ZSAyNiB5ZWFycyBvbGQh
+	fmt.Println(encodedData)
+
+	// ---- Standard decoding: like atob() in js ----
+	originalData, err := base64.StdEncoding.DecodeString(encodedData)
+	if err != nil {
+		panic(err)
+	}
+	// Hi! i have 26 years old!
+	fmt.Println(string(originalData))
+
+	// ---- URL encoding: like btoa() in js ----
+	encodedData = base64.URLEncoding.EncodeToString([]byte(data))
+	// SGkhIGkgaGF2ZSAyNiB5ZWFycyBvbGQh
+	fmt.Println(encodedData)
+
+	// ---- URL decoding: like atob() in js ----
+	originalData, err = base64.URLEncoding.DecodeString(encodedData)
+	if err != nil {
+		panic(err)
+	}
+	// Hi! i have 26 years old!
+	fmt.Println(string(originalData))
+
 }
