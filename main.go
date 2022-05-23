@@ -90,7 +90,10 @@ func main() {
 	// example19()
 
 	// playing with base64 encroding
-	example20()
+	// example20()
+
+	// playing with files
+	example21()
 }
 
 // --------------------------- //
@@ -1078,8 +1081,6 @@ func example19() {
 	// output: 7330d2b39ca35eaf4cb95fc846c21ee6a39af698154a83a586ee270a0d372104
 	fmt.Println(hash_text)
 
-	// --------------------------------------- //
-
 	// enctyption type: md5
 	hash = md5.New()
 	hash.Write([]byte(text))
@@ -1125,4 +1126,67 @@ func example20() {
 	// Hi! i have 26 years old!
 	fmt.Println(string(originalData))
 
+}
+
+// ------------------------------ //
+func example21() {
+	// basic file reading is to grab entire content into memory
+	data, err := os.ReadFile("./templates/t1.txt")
+	check(err)
+	fmt.Println(string(data))
+
+	// ---- Advanced more details ----
+	file, err := os.Open("./templates/t1.txt")
+	check(err)
+
+	// define how many bytes we want to read: ex 5 bytes
+	store := make([]byte, 5)
+	//return the number of bytes read (in this example will be 5)
+	number, err := file.Read(store)
+	check(err)
+	// 5 bytes --> Hi i'
+	fmt.Printf("%d bytes --> %s\n", number, string(store[:number]))
+
+	/*
+		We can also `Seek` to a known location in the file
+		and Read from there.
+
+		Seek() takes 2 arguments
+		------------------------
+		1st: set the offset (read from this position)
+		2nd: a number (0, 1 or 3) = positions
+			0= from the begining of file
+			1= from the offset
+			2= from the ned of file
+
+		it return the new offset
+	*/
+
+	// new offset = 13
+	_, err = file.Seek(13, 0)
+	check(err)
+	store = make([]byte, 4)
+	number, err = file.Read(store)
+	check(err)
+	// Yes!
+	fmt.Println(string(store))
+
+	// ---- More useful things ----
+	/*
+		we can also use `io` package to get some helpful functions
+	*/
+
+	// reset
+	file.Seek(0, 0)
+	store = make([]byte, 20)
+	// from, into, min
+	number, err = io.ReadAtLeast(file, store, 6) // read until store is fulfilled, but at least 6 bytes
+	check(err)
+	fmt.Println(`------- io pacakge -------`)
+	fmt.Println(string(store))
+}
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
