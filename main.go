@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
@@ -1230,6 +1231,25 @@ func example22() {
 	// write string to file (append to "Hi\n")
 	_, err = file.WriteString("السلام عليكم")
 	check(err)
+
+	/*
+		This function not only commits the current contents of the file to persistent storage
+		but also flushes the file system’s in-memory copy of recently written data to the persistent store.
+		Taking care of the memory footprints is always a good idea in programming.
+	*/
+	file.Sync()
+
+	// ---- io package ----
+	_, err = io.WriteString(file, "\nHoa! ")
+	check(err)
+
+	// ---- bufio package (buffered writers) ----
+	writer := bufio.NewWriter(file)
+	_, err = writer.WriteString("como estas\n")
+	check(err)
+
+	// commit!
+	writer.Flush()
 }
 func check(err error) {
 	if err != nil {
