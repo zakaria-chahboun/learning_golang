@@ -92,8 +92,11 @@ func main() {
 	// playing with base64 encroding
 	// example20()
 
-	// playing with files
-	example21()
+	// playing with reading files
+	// example21()
+
+	// playing with writing files
+	example22()
 }
 
 // --------------------------- //
@@ -1138,14 +1141,16 @@ func example21() {
 	// ---- Advanced more details ----
 	file, err := os.Open("./templates/t1.txt")
 	check(err)
+	// important
+	defer file.Close()
 
 	// define how many bytes we want to read: ex 5 bytes
 	store := make([]byte, 5)
 	//return the number of bytes read (in this example will be 5)
-	number, err := file.Read(store)
+	length, err := file.Read(store)
 	check(err)
 	// 5 bytes --> Hi i'
-	fmt.Printf("%d bytes --> %s\n", number, string(store[:number]))
+	fmt.Printf("%d bytes --> %s\n", length, string(store[:length]))
 
 	/*
 		We can also `Seek` to a known location in the file
@@ -1166,7 +1171,7 @@ func example21() {
 	_, err = file.Seek(13, 0)
 	check(err)
 	store = make([]byte, 4)
-	number, err = file.Read(store)
+	length, err = file.Read(store)
 	check(err)
 	// Yes!
 	fmt.Println(string(store))
@@ -1180,10 +1185,51 @@ func example21() {
 	file.Seek(0, 0)
 	store = make([]byte, 20)
 	// from, into, min
-	number, err = io.ReadAtLeast(file, store, 6) // read until store is fulfilled, but at least 6 bytes
+	length, err = io.ReadAtLeast(file, store, 6) // read until store is fulfilled, but at least 6 bytes
 	check(err)
 	fmt.Println(`------- io pacakge -------`)
 	fmt.Println(string(store))
+}
+func example22() {
+	// basic file writing
+	myText := []byte("Hi i'm zaki how are you?")
+
+	/*
+		Params: (file path, btyes to write, file mode)
+
+		File Mode (Unix):
+		0000     no permissions
+		0700     read, write, & execute only for owner
+		0770     read, write, & execute for owner and group
+		0777     read, write, & execute for owner, group and others
+		0111     execute
+		0222     write
+		0333     write & execute
+		0444     read
+		0555     read & execute
+		0666     read & write
+		0740     owner can read, write, & execute; group can only read; others have no permissions
+
+		------------------
+		for example if we create a file with '02222' and we want to access to it
+		we will get: "cat: files/write1.txt: Permission denied"
+		cuz we give to it just the 'write' permissions
+	*/
+	err := os.WriteFile("./files/write1.txt", myText, 0666) // 0666 or fs.FileMode(os.O_RDWR))
+	check(err)
+
+	// ----- More details -----
+	// create a file, then open itm with file mode 0666
+	file, err := os.Create("./files/write2.txt")
+	defer file.Close()
+	check(err)
+
+	// write bytes to file
+	_, err = file.Write([]byte("Hi!\n"))
+	check(err)
+	// write string to file (append to "Hi\n")
+	_, err = file.WriteString("السلام عليكم")
+	check(err)
 }
 func check(err error) {
 	if err != nil {
