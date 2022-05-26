@@ -97,7 +97,12 @@ func main() {
 	// example21()
 
 	// playing with writing files
-	example22()
+	// example22()
+
+	// playing with line filters (aka pipe program)
+	// echo "Hi, how are you?" | go run main.go
+	// cat files/write1.txt | go run main.go
+	example23()
 }
 
 // --------------------------- //
@@ -1254,5 +1259,34 @@ func example22() {
 func check(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+// ------------------------------ //
+func example23() {
+	/*
+		A line filter is a common type of program that reads input on 'stdin', processes it,
+		and then prints some derived result to 'stdout'.
+		'grep' is common line filters.
+
+		like `pipe`
+
+		--------------
+		Wrapping the unbuffered 'os.Stdin' with a buffered scanner
+		gives us a convenient Scan method that advances the scanner to the next token,
+		which is the next line in the default scanner.
+	*/
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		upper := strings.ToUpper(line)
+		fmt.Println(upper)
+	}
+
+	// check errors
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
 	}
 }
