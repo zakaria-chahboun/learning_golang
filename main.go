@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -102,7 +103,10 @@ func main() {
 	// playing with line filters (aka pipe program)
 	// echo "Hi, how are you?" | go run main.go
 	// cat files/write1.txt | go run main.go
-	example23()
+	// example23()
+
+	// playing with File Path (crossplatform)
+	example24()
 }
 
 // --------------------------- //
@@ -1269,7 +1273,8 @@ func example23() {
 		and then prints some derived result to 'stdout'.
 		'grep' is common line filters.
 
-		like `pipe`
+		like pipe:
+		echo "Hi, how are you?" | go run main.go
 
 		--------------
 		Wrapping the unbuffered 'os.Stdin' with a buffered scanner
@@ -1289,4 +1294,64 @@ func example23() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+// ------------------------------ //
+func example24() {
+	path := filepath.Join("dir1", "dir2", `filename`)
+	// -> dir1/dir2/filename
+	fmt.Println(path)
+
+	/*
+		Join will also normalize paths
+		by removing superfluous separators and directory changes.
+	*/
+	path = filepath.Join("dir1//", `filename`)
+	// -> dir1/filename
+	fmt.Println(path)
+
+	path = filepath.Join("dir1/../dir1", `filename`)
+	// -> dir1/filename
+	fmt.Println(path)
+
+	// ---- get directory from path ----
+	path = "/home/zaki/Documents/book.pdf"
+	dir := filepath.Dir(path)
+	// -> /home/zaki/Documents
+	fmt.Println(dir)
+	// -> book.pdf
+	base := filepath.Base(path)
+	fmt.Println(base)
+
+	// ---- Absolute path checkng ----
+	// -> false
+	fmt.Println(filepath.IsAbs("desktop/file.txt"))
+	// -> true
+	fmt.Println(filepath.IsAbs("/desktop/file.txt"))
+
+	// ---- File Extension ----
+	filename := "Readme.md"
+	ext := filepath.Ext(filename)
+	// -> .md
+	fmt.Println(ext)
+	// -> Readme
+	filename = strings.TrimSuffix(filename, ext)
+	fmt.Println(filename)
+
+	/*
+		`Rel` finds a relative path between a `base` and a `target`.
+		It returns an error if the target cannot be made relative to base.
+	*/
+
+	rel, err := filepath.Rel("a/b", "a/b/t/file")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(rel)
+	rel, err = filepath.Rel("a/b", "a/c/t/file")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(rel)
+
 }
