@@ -23,7 +23,7 @@ import (
 	"sync/atomic"
 	"text/template"
 	"time"
-
+	"embed"
 	"example.com/bill"
 )
 
@@ -109,7 +109,10 @@ func main() {
 	// example24()
 
 	// playing with temporary files and dirs
-	example25()
+  // example25()
+
+  // playing with Embed Directive
+  example26()
 }
 
 // --------------------------- //
@@ -1400,4 +1403,32 @@ func example25() {
 
 	// just to wait to see the files
 	//time.Sleep(time.Second * 10)
+}
+// ------------------------------ //
+//go:embed templates/t1.txt
+var fileString string
+
+//go:embed templates/t2.txt
+var fileByte []byte
+
+//go:embed templates/*
+var folder embed.FS
+
+func example26(){
+	/*
+		<go:embed> is a compiler directive that allows programs to include
+		arbitrary files and folders in the Go binary at build time.
+	*/
+
+	// Print the embed "templates/t1.txt" content
+	fmt.Println(fileString)
+	fmt.Println("----------------")
+	// Print the embed "templates/t2.txt" content
+	fmt.Println(string(fileByte))
+	fmt.Println("----------------")
+
+	// Print anyting from the embed templates folder
+	content, err := folder.ReadFile("templates/t3.txt")
+	check(err)
+	fmt.Println(string(content))
 }
