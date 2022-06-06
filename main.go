@@ -106,7 +106,10 @@ func main() {
 	// example23()
 
 	// playing with File Path (crossplatform)
-	example24()
+	// example24()
+
+	// playing with temporary files and dirs
+	example25()
 }
 
 // --------------------------- //
@@ -1354,4 +1357,47 @@ func example24() {
 	}
 	fmt.Println(rel)
 
+}
+
+// ------------------------------ //
+func example25() {
+	/*
+		Throughout program execution,
+		we often want to create data that isn’t needed after the program exits.
+		Temporary files and directories are useful for this purpose since they don’t pollute the file system over time.
+	*/
+
+	// create a temp file, open it with read/write modes, in the default location in the os (linux /tmp)
+	tempFile, err := os.CreateTemp("", "sample") // "" -> default lcoation, "sample" is the pattern, the file name will ba like that: "/tmp/sample1722126074"
+	check(err)
+	// remove file after closing
+	defer os.Remove(tempFile.Name())
+	// display the file name (the path) -> "/tmp/sample1722126074"
+	fmt.Println("temporary file name:", tempFile.Name())
+
+	// ---- Custom Path with Custom name ----
+	name := "myfile-*" // with be like that -> "myfile-154965564", the func replace the '*'
+	directory := "./files"
+	tempFile2, err := os.CreateTemp(directory, name)
+	check(err)
+	defer os.Remove(tempFile2.Name())
+	// -> ./files/myfile-3811349410
+	fmt.Println("temporary file2 name:", tempFile2.Name())
+
+	// ---- temporary directories ----
+	tempDir, err := os.MkdirTemp("", "mydir")
+	check(err)
+	// display dir name (path)
+	fmt.Println("temporary dir name:", tempDir)
+	// remove the dir with all content
+	defer os.RemoveAll(tempDir)
+
+	// add a file to the temporary directory
+	newFilePath := filepath.Join(tempDir, "newFile.txt")
+	err = os.WriteFile(newFilePath, []byte("hello!\n"), 0666)
+	check(err)
+
+
+	// just to wait to see the files
+	//time.Sleep(time.Second * 10)
 }
