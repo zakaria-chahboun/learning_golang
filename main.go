@@ -5,8 +5,10 @@ import (
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
+	"embed"
 	"encoding/base64"
 	"encoding/json"
+	"example.com/bill"
 	"fmt"
 	"io"
 	"log"
@@ -23,8 +25,6 @@ import (
 	"sync/atomic"
 	"text/template"
 	"time"
-	"embed"
-	"example.com/bill"
 )
 
 func main() {
@@ -109,10 +109,10 @@ func main() {
 	// example24()
 
 	// playing with temporary files and dirs
-  // example25()
+	// example25()
 
-  // playing with Embed Directive
-  example26()
+	// playing with Embed Directive
+	example26()
 }
 
 // --------------------------- //
@@ -421,7 +421,7 @@ func example7() {
 
 	/*
 		We can use context as a store (like context in svelte)
-		The context store the data in a "map", so yu can use what ever type of data!
+		The context store the data in a "map", so you can use what ever type of data!
 	*/
 	myStore := context.Background() // scoped context: means my parent is "this" func: example7()
 	myStore = storeValue(myStore)   // return a new store (immutable)
@@ -1400,10 +1400,10 @@ func example25() {
 	err = os.WriteFile(newFilePath, []byte("hello!\n"), 0666)
 	check(err)
 
-
 	// just to wait to see the files
 	//time.Sleep(time.Second * 10)
 }
+
 // ------------------------------ //
 //go:embed templates/t1.txt
 var fileString string
@@ -1414,7 +1414,7 @@ var fileByte []byte
 //go:embed templates/*
 var folder embed.FS
 
-func example26(){
+func example26() {
 	/*
 		<go:embed> is a compiler directive that allows programs to include
 		arbitrary files and folders in the Go binary at build time.
